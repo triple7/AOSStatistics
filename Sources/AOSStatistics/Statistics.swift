@@ -77,36 +77,42 @@ public func sampleFromBins(using rng: GKRandomSource, bins: [Bin]) -> Float {
     }
     return bins.last!.max
 }
-
 public func generateHistograms(values: [Float], iterations: Int, bins: Int) -> [Int: [Bin]] {
     var results: [Int: [Bin]] = [:]
-    var currentValues = values
 
-    for iter in 1...iterations {
-        let (_, edges) = histogram(values: currentValues, bins: bins)
+    func recurse(level: Int, vals: [Float]) {
+        guard level <= iterations else { return }
+        guard !vals.isEmpty else { return }
 
-        // Only take the first `bins` entries, since edges contains bins+1 items.
-        let binStructs = Array(edges[0..<bins])
-        results[iter] = binStructs
+        // 1. Compute histogram
+        let (_, edges) = histogram(values: vals, bins: bins)
+        let allBins = Array(edges[0..<bins])   // drop extra last edge
 
-        guard let maxIndex = binStructs.enumerated().max(by: { $0.element.weight < $1.element.weight })?.offset else {
-            break
+        // 2. Find largest-amplitude bin
+        guard let maxIndex = allBins.enumerated()
+            .max(by: { $0.element.weight < $1.element.weight })?.offset else {
+            return
         }
 
-        let largestBin = binStructs[maxIndex]
-        let minRange = largestBin.min
-        let maxRange = largestBin.max
+        let largestBin = allBins[maxIndex]
 
-        let filtered = currentValues.filter { v in
-            (v >= minRange && v < maxRange)
+        // 3. Store **all bins except the largest**
+        var otherBins = allBins
+        otherBins.remove(at: maxIndex)
+        results[level] = otherBins
+
+        // 4. Filter values to largest bin range
+        let filtered = vals.filter { v in
+            v >= largestBin.min && v < largestBin.max
         }
 
-        if filtered.isEmpty {
-            break
-        }
+        // 5. Stop if no values remain
+        guard !filtered.isEmpty else { return }
 
-        currentValues = filtered
+        // 6. Recurse
+        recurse(level: level + 1, vals: filtered)
     }
 
+    recurse(level: 1, vals: values)
     return results
 }
