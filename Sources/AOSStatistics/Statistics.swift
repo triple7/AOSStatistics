@@ -77,6 +77,7 @@ public func sampleFromBins(using rng: GKRandomSource, bins: [Bin]) -> Float {
     }
     return bins.last!.max
 }
+
 public func generateHistograms(values: [Float], iterations: Int, bins: Int) -> [Int: [Bin]] {
     var results: [Int: [Bin]] = [:]
 
@@ -84,33 +85,38 @@ public func generateHistograms(values: [Float], iterations: Int, bins: Int) -> [
         guard level <= iterations else { return }
         guard !vals.isEmpty else { return }
 
-        // 1. Compute histogram
         let (_, edges) = histogram(values: vals, bins: bins)
-        let allBins = Array(edges[0..<bins])   // drop extra last edge
+        let allBins = Array(edges[0..<bins])   // keep exactly 'bins' bins
 
-        // 2. Find largest-amplitude bin
+        // Find the bin with the largest amplitude
         guard let maxIndex = allBins.enumerated()
             .max(by: { $0.element.weight < $1.element.weight })?.offset else {
             return
         }
 
+        // Determine if this is the final iteration
+        let isLastIteration: Bool = (level == iterations)
+
+        // Filter values to the max bin
         let largestBin = allBins[maxIndex]
-
-        // 3. Store **all bins except the largest**
-        var otherBins = allBins
-        otherBins.remove(at: maxIndex)
-        results[level] = otherBins
-
-        // 4. Filter values to largest bin range
-        let filtered = vals.filter { v in
+        let nextValues = vals.filter { v in
             v >= largestBin.min && v < largestBin.max
         }
 
-        // 5. Stop if no values remain
-        guard !filtered.isEmpty else { return }
+        // If this is the last iteration OR filtering yields no further values:
+        // → store ALL bins (including largest)
+        if nextValues.isEmpty || isLastIteration {
+            results[level] = allBins
+            return
+        }
 
-        // 6. Recurse
-        recurse(level: level + 1, vals: filtered)
+        // Otherwise: store all bins except the largest one
+        var nonLargestBins = allBins
+        nonLargestBins.remove(at: maxIndex)
+        results[level] = nonLargestBins
+
+        // Continue recursion
+        recurse(level: level + 1, vals: nextValues)
     }
 
     recurse(level: 1, vals: values)
