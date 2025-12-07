@@ -18,6 +18,7 @@ public typealias Color = NSColor
 
 public struct GistRainbow: Codable {
 
+    
     public struct RGB: Codable {
         public let r: CGFloat
         public let g: CGFloat
@@ -42,6 +43,7 @@ public struct GistRainbow: Codable {
     public let orange    = RGB(r: 1.00, g: 0.50, b: 0.00)
     public let red       = RGB(r: 1.00, g: 0.00, b: 0.00)
 
+    public init() {}
     // MARK: - Return all colors in correct frequency order
     public func getColors() -> [Color] {
         return [
