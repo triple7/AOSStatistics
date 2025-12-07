@@ -150,6 +150,7 @@ public func refineBinsRecursively(
         var cumulativeThreshold = cumulativeBin.percentage
         var cumulativeWeight = cumulativeBin.weight
         if cumulativeThreshold <= thresholdPercentage {
+            print("Cumulative threshold \(cumulativeThreshold) less than threshold")
             if (currentIndex + 1) <= flattenedBins.count {
                 var j:Int = 1
                 var lastBin:Bin
@@ -157,11 +158,13 @@ public func refineBinsRecursively(
                     cumulativeThreshold += flattenedBins[j].percentage
                     cumulativeWeight += flattenedBins[j].weight
                     j += 1
+                    print("New cumulative \(cumulativeThreshold)")
                 }
                 lastBin = flattenedBins[currentIndex + j]
                 finalBins.append(Bin(min: flattenedBins[currentIndex].min, max: lastBin.max, weight: cumulativeWeight, percentage: cumulativeThreshold))
                 currentIndex += j
             } else {
+                print("Trailing bin \(flattenedBins[currentIndex])")
                 // Trailing bin, just append
                 finalBins.append(flattenedBins[currentIndex])
             }
