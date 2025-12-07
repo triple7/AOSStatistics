@@ -9,7 +9,7 @@
 import Foundation
 import GameplayKit
 
-public struct Bin {
+public struct Bin:Equatable {
     public var min: Float
     public var max: Float
     public var weight: Float      // Fraction of total (0–1)
@@ -20,6 +20,7 @@ public struct Bin {
         self.percentage = weight * 100.0
     }
 }
+
 public func histogram(values: [Float], bins: Int, range: (Float, Float)? = nil) -> ([Int], [Bin]) {
 
     // Determine range
@@ -81,71 +82,74 @@ public func refineBinsRecursively(
     maxBins: Int,
     thresholdPercentage: Float
 ) -> [Bin] {
-
+    
     // Define the global domain (must never shrink)
-    let globalMin = values.min()!
-    let globalMax = values.max()!
-
-    func recurse(valuesSubset: [Float]) -> [Float] {
-
-        // Compute local histogram inside global domain
-        let (_, bins) = histogram(
-            values: valuesSubset,
-            bins: maxBins,
-            range: (globalMin, globalMax)
-        )
-
-        let usable = Array(bins[0..<maxBins])
-
-        // Find largest bin
-        guard let maxIdx = usable.enumerated().max(by: { $0.element.percentage < $1.element.percentage })?.offset else {
-            return valuesSubset
+    var flattenedBins = [Bin]()
+    var belowThreshold = false
+    var histBins = histogram(values: values, bins: maxBins).1
+    while !belowThreshold {
+        
+        var maxBin = histBins.first!
+        var maxBinPercentage:Float = 0
+        var maxValue:Float = 0
+        for bin in histBins {
+            if bin.percentage > maxBinPercentage {
+                maxBinPercentage = bin.percentage
+                maxBin = bin
+                maxValue = bin.max
+            }
         }
-
-        let largest = usable[maxIdx]
-
-        // Stop if threshold not exceeded
-        if largest.percentage < thresholdPercentage {
-            return valuesSubset
-        }
-
-        // Filter values inside that bin
-        let filtered = valuesSubset.filter { v in
-            v >= largest.min && v < largest.max
-        }
-
-        if filtered.isEmpty { return valuesSubset }
-
-        // Recurse with filtered values
-        return recurse(valuesSubset: filtered)
-    }
-
-    // 🟦 Step 1: Find final filtered values via recursive narrowing
-    let finalValues = recurse(valuesSubset: values)
-
-    // 🟩 Step 2: Reconstitute FINAL histogram in original global range
-    let (_, finalBins) = histogram(
-        values: finalValues,
-        bins: maxBins,
-        range: (globalMin, globalMax)
-    )
-
-    return Array(finalBins[0..<maxBins])
-}
-
-public func sampleFromBins(using rng: GKRandomSource, bins: [Bin]) -> Float {
-    let totalWeight = bins.map { $0.weight }.reduce(0, +)
-    let threshold = rng.nextUniform() * totalWeight
-
-    var cumulative: Float = 0.0
-    for bin in bins {
-        cumulative += bin.weight
-        if threshold <= cumulative {
-            let u = rng.nextUniform()
-            return bin.min + (bin.max - bin.min) * u
+        
+        if maxBin.percentage > thresholdPercentage {
+            // Collate the smaller percentages
+            for bin in histBins {
+                if bin == maxBin {
+                    flattenedBins.append(bin)
+                }
+            }
+            
+            // Continue with a new histogram
+            let maxbinValues = values.filter{$0 < maxValue}
+            histBins = histogram(values: maxbinValues, bins: maxBins).1
+        } else {
+            belowThreshold = true
         }
     }
-    return bins.last!.max
+    
+    // Recalculate bin ranges
+    var finalBins = [Bin]()
+    print("Flattened bin count: \(flattenedBins.count)")
+    var cumulativeBin:Bin
+    var currentIndex = 0
+    while currentIndex <= flattenedBins.count {
+        cumulativeBin = flattenedBins[currentIndex]
+        var cumulativeThreshold = cumulativeBin.percentage
+        var cumulativeWeight = cumulativeBin.weight
+        if cumulativeThreshold <= thresholdPercentage {
+            if (currentIndex + 1) <= flattenedBins.count {
+                var j:Int = 1
+                var lastBin:Bin
+                while cumulativeThreshold <= thresholdPercentage && (currentIndex + j) <= flattenedBins.count  {
+                    cumulativeThreshold += flattenedBins[j].percentage
+                    cumulativeWeight += flattenedBins[j].weight
+                    j += 1
+                }
+                lastBin = flattenedBins[currentIndex + j]
+                finalBins.append(Bin(min: flattenedBins[currentIndex].min, max: lastBin.max, weight: cumulativeWeight, percentage: cumulativeThreshold))
+                currentIndex += j
+            } else {
+                // Trailing bin, just append
+                finalBins.append(flattenedBins[currentIndex])
+            }
+        } else {
+            // threshold is greater but the bin has floating point marginal overshot
+            if currentIndex <= flattenedBins.count {
+                finalBins.append(flattenedBins[currentIndex])
+                currentIndex += 1
+            }
+        }
+    }
+    return finalBins
 }
 
 public func spreadBinLists(values: [Float], bins: Int, by percentage: CGFloat) -> [Bin] {
