@@ -22,10 +22,6 @@ public struct Bin {
 }
 public func histogram(values: [Float], bins: Int, range: (Float, Float)? = nil) -> ([Int], [Bin]) {
 
-    guard !values.isEmpty, bins > 0 else {
-        return ([], [])
-    }
-
     // Determine range
     let minVal: Float
     let maxVal: Float
@@ -86,46 +82,55 @@ public func refineBinsRecursively(
     thresholdPercentage: Float
 ) -> [Bin] {
 
-    func recurse(values: [Float], range: (Float, Float)?) -> [Bin] {
-        let (_, bins) = histogram(values: values, bins: maxBins, range: range)
-        let usableBins = Array(bins[0..<maxBins])
+    // Define the global domain (must never shrink)
+    let globalMin = values.min()!
+    let globalMax = values.max()!
+
+    func recurse(valuesSubset: [Float]) -> [Float] {
+
+        // Compute local histogram inside global domain
+        let (_, bins) = histogram(
+            values: valuesSubset,
+            bins: maxBins,
+            range: (globalMin, globalMax)
+        )
+
+        let usable = Array(bins[0..<maxBins])
 
         // Find largest bin
-        guard let maxIndex = usableBins.enumerated()
-            .max(by: { $0.element.percentage < $1.element.percentage })?.offset else {
-            return usableBins
+        guard let maxIdx = usable.enumerated().max(by: { $0.element.percentage < $1.element.percentage })?.offset else {
+            return valuesSubset
         }
 
-        let largest = usableBins[maxIndex]
+        let largest = usable[maxIdx]
 
-        // If this bin does NOT exceed the threshold, we stop recursing
+        // Stop if threshold not exceeded
         if largest.percentage < thresholdPercentage {
-            return usableBins
+            return valuesSubset
         }
 
-        // Filter values into the largest bin's range
-        let filtered = values.filter { v in
+        // Filter values inside that bin
+        let filtered = valuesSubset.filter { v in
             v >= largest.min && v < largest.max
         }
 
-        if filtered.isEmpty {
-            // Cannot refine further — return current bins
-            return usableBins
-        }
+        if filtered.isEmpty { return valuesSubset }
 
-        // Recurse into this narrowed range
-        let refined = recurse(values: filtered, range: (largest.min, largest.max))
-
-        // After recursion, we must reconstitute the bins:
-        // i.e., return NEW bins spanning the narrowed domain
-        let newMin = refined.first!.min
-        let newMax = refined.last!.max
-
-        let (_, finalBins) = histogram(values: values, bins: maxBins, range: (newMin, newMax))
-        return Array(finalBins[0..<maxBins])
+        // Recurse with filtered values
+        return recurse(valuesSubset: filtered)
     }
 
-    return recurse(values: values, range: nil)
+    // 🟦 Step 1: Find final filtered values via recursive narrowing
+    let finalValues = recurse(valuesSubset: values)
+
+    // 🟩 Step 2: Reconstitute FINAL histogram in original global range
+    let (_, finalBins) = histogram(
+        values: finalValues,
+        bins: maxBins,
+        range: (globalMin, globalMax)
+    )
+
+    return Array(finalBins[0..<maxBins])
 }
 
 public func sampleFromBins(using rng: GKRandomSource, bins: [Bin]) -> Float {
