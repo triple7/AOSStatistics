@@ -20,40 +20,58 @@ public struct Bin {
         self.percentage = weight * 100.0
     }
 }
-
 public func histogram(values: [Float], bins: Int, range: (Float, Float)? = nil) -> ([Int], [Bin]) {
 
+    guard !values.isEmpty, bins > 0 else {
+        return ([], [])
+    }
+
+    // Determine range
     let minVal: Float
     let maxVal: Float
 
-    if let range = range {
-        minVal = range.0
-        maxVal = range.1
+    if let r = range {
+        minVal = r.0
+        maxVal = r.1
     } else {
         minVal = values.min()!
         maxVal = values.max()!
     }
 
+    // Compute bin width
     let binWidth = (maxVal - minVal) / Float(bins)
+
+    // Prepare counts and bin edges
     var counts = Array(repeating: 0, count: bins)
-    var edges = [Bin]()
+    var edges: [Bin] = []
+    edges.reserveCapacity(bins)
 
-    var lastEdge: Float = 0
-    for i in 0...bins {
-        let edge = minVal + Float(i) * binWidth
-        edges.append(Bin(min: lastEdge, max: edge, weight: 0, percentage: 0))
-        lastEdge = edge
+    // Build correct bin edges
+    var lastEdge = minVal
+
+    for i in 1...bins {
+        let nextEdge = minVal + Float(i) * binWidth
+        edges.append(Bin(min: lastEdge, max: nextEdge, weight: 0, percentage: 0))
+        lastEdge = nextEdge
     }
 
-    for value in values {
-        if value < minVal || value > maxVal { continue }
+    // Fill counts
+    for v in values {
+        if v < minVal { continue }
+        if v > maxVal { continue }
 
-        var index = Int((value - minVal) / binWidth)
-        if index == bins { index = bins - 1 }  // Edge case: max value
-        counts[index] += 1
+        // compute bin index
+        var idx = Int((v - minVal) / binWidth)
+
+        // Handle max-value edge case
+        if idx == bins { idx = bins - 1 }
+
+        counts[idx] += 1
     }
 
+    // Assign weights and percentages
     let total = Float(values.count)
+
     for i in 0..<bins {
         let w = Float(counts[i]) / total
         edges[i].setWeight(weight: w)
