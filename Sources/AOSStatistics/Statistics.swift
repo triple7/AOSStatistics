@@ -145,7 +145,7 @@ public func refineBinsRecursively(
     print("Flattened bin count: \(flattenedBins.count)")
     var cumulativeBin:Bin
     var currentIndex = 0
-    while currentIndex <= flattenedBins.count {
+    while currentIndex < flattenedBins.count {
         print("getting bin at index \(currentIndex)")
         cumulativeBin = flattenedBins[currentIndex]
         var cumulativeThreshold = cumulativeBin.percentage/100
@@ -178,6 +178,7 @@ public func refineBinsRecursively(
             }
         }
     }
+    print("Final bins count: \(finalBins.count)")
     return finalBins
 }
 
