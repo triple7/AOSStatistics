@@ -117,10 +117,14 @@ public func refineBinsRecursively(
             // Continue with a new histogram
             let maxbinValues = values.filter{$0 < maxValue}
             
-            let newMin = maxbinValues.min()
-            let newMax = maxbinValues.max()
+            let newMin = maxbinValues.min()!
+            let newMax = maxbinValues.max()!
             print("New values under maxValue: \(maxbinValues.count) min \(newMin) max \(newMax)")
 
+            if newMin == newMax {
+                // reached the last bin
+                print("Last max bin \(maxBin.min) \(maxBin.max)")
+            }
             histBins = histogram(values: maxbinValues, bins: maxBins).1
             maxBinPercentage = 0
             maxValue = 0
