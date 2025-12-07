@@ -124,6 +124,9 @@ public func refineBinsRecursively(
             if newMin == newMax {
                 // reached the last bin
                 print("Last max bin \(maxBin.min) \(maxBin.max)")
+                flattenedBins.append(maxBin)
+                belowThreshold = true
+                continue
             }
             histBins = histogram(values: maxbinValues, bins: maxBins).1
             maxBinPercentage = 0
