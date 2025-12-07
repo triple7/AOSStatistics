@@ -37,6 +37,7 @@ public func histogram(values: [Float], bins: Int, range: (Float, Float)? = nil) 
 
     // Compute bin width
     let binWidth = (maxVal - minVal) / Float(bins)
+    print("bin min \(minVal) max \(maxVal)")
 
     // Prepare counts and bin edges
     var counts = Array(repeating: 0, count: bins)
@@ -87,11 +88,11 @@ public func refineBinsRecursively(
     var flattenedBins = [Bin]()
     var belowThreshold = false
     var histBins = histogram(values: values, bins: maxBins).1
+    var maxBin = histBins.first!
+    var maxBinPercentage:Float = 0
+    var maxValue:Float = 0
+
     while !belowThreshold {
-        
-        var maxBin = histBins.first!
-        var maxBinPercentage:Float = 0
-        var maxValue:Float = 0
         for bin in histBins {
             if bin.percentage > maxBinPercentage {
                 maxBinPercentage = bin.percentage
@@ -100,6 +101,7 @@ public func refineBinsRecursively(
             }
         }
         
+        print("MaxBin: min \(maxBin.min) max \(maxBin.max) percentage \(maxBinPercentage)")
         if maxBin.percentage > thresholdPercentage {
             // Collate the smaller percentages
             for bin in histBins {
@@ -112,7 +114,9 @@ public func refineBinsRecursively(
             let maxbinValues = values.filter{$0 < maxValue}
             histBins = histogram(values: maxbinValues, bins: maxBins).1
         } else {
+            print("Reached below threshold: \(maxBinPercentage)")
             belowThreshold = true
+            continue
         }
     }
     
