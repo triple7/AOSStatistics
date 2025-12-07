@@ -168,7 +168,7 @@ public func refineBinsRecursively(
             if (currentIndex + 1) <= flattenedBins.count {
                 var j:Int = 1
                 var lastBin = flattenedBins[currentIndex + 1]
-                while cumulativeThreshold <= thresholdPercentage && (currentIndex + j) <= flattenedBins.count  {
+                while cumulativeThreshold <= thresholdPercentage && (currentIndex + j) < flattenedBins.count  {
                     lastBin = flattenedBins[currentIndex + j]
                     cumulativeThreshold += lastBin.percentage/100
                     cumulativeWeight += lastBin.weight
