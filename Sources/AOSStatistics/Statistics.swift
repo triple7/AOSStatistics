@@ -150,9 +150,9 @@ public func refineBinsRecursively(
     // Recalculate bin ranges
     print("Recalculating bin ranges")
     flattenedBins.sort()
-    for bin in flattenedBins {
-        print("flat bin: \(bin.min) \(bin.max)")
-    }
+//    for bin in flattenedBins {
+//        print("flat bin: \(bin.min) \(bin.max)")
+//    }
     var finalBins = [Bin]()
     print("Flattened bin count: \(flattenedBins.count)")
     var cumulativeBin:Bin
@@ -173,7 +173,7 @@ public func refineBinsRecursively(
                     cumulativeThreshold += lastBin.percentage/100
                     cumulativeWeight += lastBin.weight
                     j += 1
-                    print("New cumulative \(cumulativeThreshold)")
+                    print("New cumulative \(cumulativeThreshold) at \(currentIndex + j)")
                 }
                 finalBins.append(Bin(min: flattenedBins[currentIndex].min, max: lastBin.max, weight: cumulativeWeight, percentage: cumulativeThreshold*100))
                 currentIndex += j
