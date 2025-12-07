@@ -92,6 +92,9 @@ public func refineBinsRecursively(
     var maxBinPercentage:Float = 0
     var maxValue:Float = 0
 
+    for bin in histBins {
+        print("bin: \(bin.min) \(bin.max)")
+    }
     print("total values: \(values.count)")
     while !belowThreshold {
         print("Reiterating histograms")
