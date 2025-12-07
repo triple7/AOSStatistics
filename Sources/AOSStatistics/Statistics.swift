@@ -114,9 +114,6 @@ public func refineBinsRecursively(
             }
             
             print("Added \(flattenedBins.count) bins")
-            for bin in flattenedBins {
-                print("Bin: \(bin.min) \(bin.max) \(bin.percentage)")
-            }
             // Continue with a new histogram
             let maxbinValues = values.filter{$0 < maxValue}
             
