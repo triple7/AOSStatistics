@@ -78,6 +78,65 @@ public func sampleFromBins(using rng: GKRandomSource, bins: [Bin]) -> Float {
     return bins.last!.max
 }
 
+public func spreadBinLists(values: [Float], bins: Int, by percentage: CGFloat) -> [Bin] {
+    let (_, originalBins) = histogram(values: values, bins: bins)
+
+    // Only keep the first `bins` entries (histogram returns bins + 1 edges)
+    let binsOnly = Array(originalBins[0..<bins])
+
+    var results: [Bin] = []
+    var currentGroup: [Bin] = []
+    var cumulative: CGFloat = 0.0
+
+    for bin in binsOnly {
+        let p = CGFloat(bin.percentage)
+        let newCumulative = cumulative + p
+
+        // If adding the bin exceeds the target threshold, close previous group
+        if !currentGroup.isEmpty && newCumulative > percentage {
+            // Create a merged bin
+            let merged = mergeBins(group: currentGroup)
+            results.append(merged)
+
+            // Start a new group with current bin
+            currentGroup = [bin]
+            cumulative = p
+        } else {
+            // Add bin normally
+            currentGroup.append(bin)
+            cumulative = newCumulative
+        }
+    }
+
+    // Add the final group if any bins remain
+    if !currentGroup.isEmpty {
+        let merged = mergeBins(group: currentGroup)
+        results.append(merged)
+    }
+
+    return results
+}
+
+/// Merge a group of bins into one combined bin
+private func mergeBins(group: [Bin]) -> Bin {
+    guard let first = group.first else {
+        return Bin(min: 0, max: 0, weight: 0, percentage: 0)
+    }
+
+    let minVal = group.map { $0.min }.min()!
+    let maxVal = group.map { $0.max }.max()!
+    let totalWeight = group.map { $0.weight }.reduce(0, +)
+
+    var merged = Bin(
+        min: minVal,
+        max: maxVal,
+        weight: totalWeight,
+        percentage: totalWeight * 100
+    )
+
+    return merged
+}
+
 public func generateHistograms(values: [Float], iterations: Int, bins: Int) -> [Int: [Bin]] {
     var results: [Int: [Bin]] = [:]
 
