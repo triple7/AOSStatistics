@@ -9,7 +9,7 @@
 import Foundation
 import GameplayKit
 
-public struct Bin:Equatable {
+public struct Bin:Equatable, Comparable {
     public var min: Float
     public var max: Float
     public var weight: Float      // Fraction of total (0–1)
@@ -18,6 +18,10 @@ public struct Bin:Equatable {
     public mutating func setWeight(weight: Float) {
         self.weight = weight
         self.percentage = weight * 100.0
+    }
+    
+    public static func <(lhs: Bin, rhs: Bin) -> Bool {
+        return lhs.max < rhs.max
     }
 }
 
@@ -97,7 +101,7 @@ public func refineBinsRecursively(
     }
     print("total values: \(values.count)")
     while !belowThreshold {
-        print("Reiterating histograms")
+//        print("Reiterating histograms")
         for bin in histBins {
             if bin.percentage/100 > maxBinPercentage {
                 maxBinPercentage = bin.percentage/100
@@ -107,9 +111,9 @@ public func refineBinsRecursively(
         }
         
         print("MaxBin: min \(maxBin.min) max \(maxBin.max) percentage \(maxBinPercentage)")
-        print("Percentage threshold: \(thresholdPercentage)")
+//        print("Percentage threshold: \(thresholdPercentage)")
         if maxBinPercentage > thresholdPercentage {
-            print("MaxBin percentage > threshold")
+//            print("MaxBin percentage > threshold")
             // Collate the smaller percentages
             for bin in histBins {
                 if bin != maxBin {
@@ -117,16 +121,13 @@ public func refineBinsRecursively(
                 }
             }
             
-            print("Added \(flattenedBins.count) bins")
-            for bin in flattenedBins {
-                print("flat bin: \(bin.min) \(bin.max)")
-            }
+//            print("Added \(flattenedBins.count) bins")
             // Continue with a new histogram
             let maxbinValues = values.filter{$0 < maxValue}
             
             let newMin = maxbinValues.min()!
             let newMax = maxbinValues.max()!
-            print("New values under maxValue: \(maxbinValues.count) min \(newMin) max \(newMax)")
+//            print("New values under maxValue: \(maxbinValues.count) min \(newMin) max \(newMax)")
 
             if newMin == newMax {
                 // reached the last bin
@@ -140,7 +141,7 @@ public func refineBinsRecursively(
             maxValue = 0
 
         } else {
-            print("Reached below threshold: \(maxBinPercentage)")
+//            print("Reached below threshold: \(maxBinPercentage)")
             belowThreshold = true
             continue
         }
@@ -148,6 +149,10 @@ public func refineBinsRecursively(
     
     // Recalculate bin ranges
     print("Recalculating bin ranges")
+    flattenedBins.sort()
+    for bin in flattenedBins {
+        print("flat bin: \(bin.min) \(bin.max)")
+    }
     var finalBins = [Bin]()
     print("Flattened bin count: \(flattenedBins.count)")
     var cumulativeBin:Bin
