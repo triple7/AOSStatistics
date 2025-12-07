@@ -41,7 +41,7 @@ public struct GistRainbow: Codable {
     public let chartreuse = RGB(r: 0.50, g: 1.00, b: 0.00)
     public let yellow    = RGB(r: 1.00, g: 1.00, b: 0.00)
     public let orange    = RGB(r: 1.00, g: 0.50, b: 0.00)
-    public let red       = RGB(r: 1.00, g: 0.00, b: 0.00)
+//    public let red       = RGB(r: 1.00, g: 0.00, b: 0.00)
 
     public init() {}
     // MARK: - Return all colors in correct frequency order
@@ -57,7 +57,7 @@ public struct GistRainbow: Codable {
             chartreuse.color(),
             yellow.color(),
             orange.color(),
-            red.color()
+//            red.color()
         ]
     }
 }
