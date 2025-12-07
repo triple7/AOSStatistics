@@ -22,7 +22,6 @@ public struct Bin {
 }
 
 public func histogram(values: [Float], bins: Int, range: (Float, Float)? = nil) -> ([Int], [Bin]) {
-    guard bins > 0, !values.isEmpty else { return ([], []) }
 
     let minVal: Float
     let maxVal: Float
@@ -80,6 +79,10 @@ public func sampleFromBins(using rng: GKRandomSource, bins: [Bin]) -> Float {
 
 public func spreadBinLists(values: [Float], bins: Int, by percentage: CGFloat) -> [Bin] {
     let (_, originalBins) = histogram(values: values, bins: bins)
+    print("Checking original bins")
+    for bin in originalBins {
+        print("bin: \(bin.min) \(bin.max) percentage \(bin.percentage)")
+    }
 
     // Only keep the first `bins` entries (histogram returns bins + 1 edges)
     let binsOnly = Array(originalBins[0..<bins])
