@@ -262,7 +262,7 @@ public func refineBinsRecursively(
     var maxValue:Float = 0
 
     for bin in histBins {
-        print("bin: \(bin.min) \(bin.max)")
+//        print("bin: \(bin.min) \(bin.max)")
     }
     print("total values: \(values.count)")
     while !belowThreshold {
@@ -275,7 +275,7 @@ public func refineBinsRecursively(
             }
         }
         
-        print("MaxBin: min \(maxBin.min) max \(maxBin.max) percentage \(maxBinPercentage)")
+//        print("MaxBin: min \(maxBin.min) max \(maxBin.max) percentage \(maxBinPercentage)")
 //        print("Percentage threshold: \(thresholdPercentage)")
         if maxBinPercentage > thresholdPercentage {
 //            print("MaxBin percentage > threshold")
@@ -367,7 +367,7 @@ public func spreadBinLists(values: [Float], bins: Int, by percentage: CGFloat) -
     let (_, originalBins) = histogram(values: values, bins: bins)
     print("Checking original bins")
     for bin in originalBins {
-        print("bin: \(bin.min) \(bin.max) percentage \(bin.percentage)")
+//        print("bin: \(bin.min) \(bin.max) percentage \(bin.percentage)")
     }
 
     // Only keep the first `bins` entries (histogram returns bins + 1 edges)
