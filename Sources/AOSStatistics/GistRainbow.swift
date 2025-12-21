@@ -17,6 +17,18 @@ public typealias Color = NSColor
 #endif
 import CoreGraphics
 
+public enum ColorFamily {
+    case violet
+    case indigo
+    case blue
+    case azure
+    case cyan
+    case green
+    case yellow
+    case orange
+    case red
+}
+
 public struct GistRainbow: Codable {
 
     public struct RGB: Codable {
@@ -93,6 +105,55 @@ public struct GistRainbow: Codable {
     public var redVeryLight    = RGB(r: 1.00, g: 0.70, b: 0.70)
 
     public init() {}
+
+    public func darkestAndBrightest(
+        for family: ColorFamily
+    ) -> (dark: Color, bright: Color) {
+
+        let darkRGB: RGB
+        let brightRGB: RGB
+
+        switch family {
+
+        case .violet:
+            darkRGB = violetVeryDark
+            brightRGB = violetVeryLight
+
+        case .indigo:
+            darkRGB = indigoVeryDark
+            brightRGB = indigoVeryLight
+
+        case .blue:
+            darkRGB = blueVeryDark
+            brightRGB = blueVeryLight
+
+        case .azure:
+            darkRGB = azureVeryDark
+            brightRGB = azureVeryLight
+
+        case .cyan:
+            darkRGB = cyanVeryDark
+            brightRGB = cyanVeryLight
+
+        case .green:
+            darkRGB = greenVeryDark
+            brightRGB = greenVeryLight
+
+        case .yellow:
+            darkRGB = yellowVeryDark
+            brightRGB = yellowVeryLight
+
+        case .orange:
+            darkRGB = orangeVeryDark
+            brightRGB = orangeVeryLight
+
+        case .red:
+            darkRGB = redVeryDark
+            brightRGB = redVeryLight
+        }
+
+        return (dark: darkRGB.color(), bright: brightRGB.color())
+    }
 
     // MARK: - Full spectrum (high → low frequency)
 
