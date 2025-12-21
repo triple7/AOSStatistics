@@ -29,33 +29,33 @@ import Foundation
 
 // MARK: - Power / Root Transforms
 
-func sqrtTransform(_ values: [Int]) -> [Float] {
+public func sqrtTransform(_ values: [Int]) -> [Float] {
     values.map { sqrt(Float($0)) }
 }
 
-func cbrtTransform(_ values: [Int]) -> [Float] {
+public func cbrtTransform(_ values: [Int]) -> [Float] {
     values.map { pow(Float($0), 1.0 / 3.0) }
 }
 
 // MARK: - Log with Offset (Soft Log)
 
-func logOffsetTransform(_ values: [Int], offset: Float = 500) -> [Float] {
+public func logOffsetTransform(_ values: [Int], offset: Float = 500) -> [Float] {
     values.map { log(Float($0) + offset) }
 }
 
-func log10OffsetTransform(_ values: [Int], offset: Float = 500) -> [Float] {
+public func log10OffsetTransform(_ values: [Int], offset: Float = 500) -> [Float] {
     values.map { log10(Float($0) + offset) }
 }
 
 // MARK: - asinh Transform (Linear near zero, log-like tail)
 
-func asinhTransform(_ values: [Int], scale: Float = 500) -> [Float] {
+public func asinhTransform(_ values: [Int], scale: Float = 500) -> [Float] {
     values.map { asinh(Float($0) / scale) }
 }
 
 // MARK: - Quantile / Rank-Based Scaling
 
-func quantileTransform(_ values: [Int]) -> [Float] {
+public func quantileTransform(_ values: [Int]) -> [Float] {
     guard values.count > 1 else { return values.map { _ in 0 } }
 
     let sorted = values.sorted()
@@ -70,7 +70,7 @@ func quantileTransform(_ values: [Int]) -> [Float] {
 
 // MARK: - Winsorized Transforms
 
-func winsorizedTransform(_ values: [Int], percentile: Float = 0.99) -> [Float] {
+public func winsorizedTransform(_ values: [Int], percentile: Float = 0.99) -> [Float] {
     guard !values.isEmpty else { return [] }
 
     let sorted = values.sorted()
@@ -80,20 +80,20 @@ func winsorizedTransform(_ values: [Int], percentile: Float = 0.99) -> [Float] {
     return values.map { Float(min($0, cap)) }
 }
 
-func winsorizedSqrtTransform(_ values: [Int], percentile: Float = 0.99) -> [Float] {
+public func winsorizedSqrtTransform(_ values: [Int], percentile: Float = 0.99) -> [Float] {
     winsorizedTransform(values, percentile: percentile).map { sqrt($0) }
 }
 
 // MARK: - Saturation / Logistic Transforms
 
-func saturationTransform(_ values: [Int], k: Float = 3000) -> [Float] {
+public func saturationTransform(_ values: [Int], k: Float = 3000) -> [Float] {
     values.map {
         let x = Float($0)
         return x / (x + k)
     }
 }
 
-func logisticTransform(_ values: [Int], mean: Float = 3000, scale: Float = 1000) -> [Float] {
+public func logisticTransform(_ values: [Int], mean: Float = 3000, scale: Float = 1000) -> [Float] {
     values.map {
         let x = Float($0)
         return 1.0 / (1.0 + exp(-(x - mean) / scale))
