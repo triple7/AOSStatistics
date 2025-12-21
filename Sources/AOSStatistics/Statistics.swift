@@ -86,6 +86,11 @@ extension CGFloat: TransformNumeric {
     }
 }
 
+// mark: constant
+public func ConstantTransform<T: TransformNumeric>(_ values: [T], constant: T = 1) -> [T] {
+    values.map { ($0 - $0) + constant }
+}
+
 // MARK: - Power / Root Transforms
 
 public func sqrtTransform<T: TransformNumeric>(_ values: [T]) -> [T] {

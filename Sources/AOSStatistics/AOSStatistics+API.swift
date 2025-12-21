@@ -12,6 +12,9 @@ public func applyTransform<T: TransformNumeric>(
 
     switch transformType {
 
+    case .constant(let constantVal):
+        return ConstantTransform(values, constant: T(constantVal)).map(Float.init)
+
     case .sqrt:
         return sqrtTransform(values).map(Float.init)
 

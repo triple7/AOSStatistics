@@ -8,6 +8,9 @@
 
 public enum TransformType {
 
+    // Mark: Constant across all
+    case constant(constantVal: Float = 1)
+    
     // MARK: Basic
     case sqrt
     case cbrt
