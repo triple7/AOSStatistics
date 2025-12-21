@@ -128,7 +128,7 @@ internal func interpolate(_ c1: Color, _ c2: Color, t: CGFloat) -> Color {
     )
 }
 
-internal func interpolateGradient(
+public func interpolateGradient(
     colors: [Color],
     count: Int
 ) -> [Color] {
