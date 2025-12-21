@@ -54,18 +54,23 @@ public func asinhTransform(_ values: [Int], scale: Float = 500) -> [Float] {
 }
 
 // MARK: - Quantile / Rank-Based Scaling
-
 public func quantileTransform(_ values: [Int]) -> [Float] {
     guard values.count > 1 else { return values.map { _ in 0 } }
 
     let sorted = values.sorted()
-    let count = Float(values.count - 1)
+    let count = Float(sorted.count - 1)
 
-    let ranks: [Int: Int] = Dictionary(
-        uniqueKeysWithValues: sorted.enumerated().map { ($0.element, $0.offset) }
-    )
+    var valueToRank: [Int: Int] = [:]
+    for (index, value) in sorted.enumerated() {
+        // assign the FIRST rank only (ignore duplicates)
+        if valueToRank[value] == nil {
+            valueToRank[value] = index
+        }
+    }
 
-    return values.map { Float(ranks[$0] ?? 0) / count }
+    return values.map {
+        Float(valueToRank[$0] ?? 0) / count
+    }
 }
 
 // MARK: - Winsorized Transforms
