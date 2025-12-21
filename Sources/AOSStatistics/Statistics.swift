@@ -5,8 +5,8 @@
 //  Created by Yuma decaux on 19/5/2025.
 //
 
-
 import Foundation
+import CoreGraphics
 import GameplayKit
 
 public struct Bin:Equatable, Comparable {
@@ -25,83 +25,168 @@ public struct Bin:Equatable, Comparable {
     }
 }
 
-import Foundation
+// MARK: - Numeric Protocol (Public)
+
+public protocol TransformNumeric: BinaryFloatingPoint {
+    static func log(_ x: Self) -> Self
+    static func log10(_ x: Self) -> Self
+    static func exp(_ x: Self) -> Self
+    static func sqrt(_ x: Self) -> Self
+    static func pow(_ x: Self, _ y: Self) -> Self
+    static func asinh(_ x: Self) -> Self
+}
+
+// MARK: - Float Conformance
+
+extension Float: TransformNumeric {
+    public static func log(_ x: Float) -> Float { Foundation.log(x) }
+    public static func log10(_ x: Float) -> Float { Foundation.log10(x) }
+    public static func exp(_ x: Float) -> Float { Foundation.exp(x) }
+    public static func sqrt(_ x: Float) -> Float { Foundation.sqrt(x) }
+    public static func pow(_ x: Float, _ y: Float) -> Float { Foundation.pow(x, y) }
+    public static func asinh(_ x: Float) -> Float { Foundation.asinh(x) }
+}
+
+// MARK: - Double Conformance
+
+extension Double: TransformNumeric {
+    public static func log(_ x: Double) -> Double { Foundation.log(x) }
+    public static func log10(_ x: Double) -> Double { Foundation.log10(x) }
+    public static func exp(_ x: Double) -> Double { Foundation.exp(x) }
+    public static func sqrt(_ x: Double) -> Double { Foundation.sqrt(x) }
+    public static func pow(_ x: Double, _ y: Double) -> Double { Foundation.pow(x, y) }
+    public static func asinh(_ x: Double) -> Double { Foundation.asinh(x) }
+}
+
+// MARK: - CGFloat Conformance
+
+extension CGFloat: TransformNumeric {
+    public static func log(_ x: CGFloat) -> CGFloat {
+        CGFloat(Foundation.log(Double(x)))
+    }
+
+    public static func log10(_ x: CGFloat) -> CGFloat {
+        CGFloat(Foundation.log10(Double(x)))
+    }
+
+    public static func exp(_ x: CGFloat) -> CGFloat {
+        CGFloat(Foundation.exp(Double(x)))
+    }
+
+    public static func sqrt(_ x: CGFloat) -> CGFloat {
+        CGFloat(Foundation.sqrt(Double(x)))
+    }
+
+    public static func pow(_ x: CGFloat, _ y: CGFloat) -> CGFloat {
+        CGFloat(Foundation.pow(Double(x), Double(y)))
+    }
+
+    public static func asinh(_ x: CGFloat) -> CGFloat {
+        CGFloat(Foundation.asinh(Double(x)))
+    }
+}
 
 // MARK: - Power / Root Transforms
 
-public func sqrtTransform(_ values: [Int]) -> [Float] {
-    values.map { sqrt(Float($0)) }
+public func sqrtTransform<T: TransformNumeric>(_ values: [T]) -> [T] {
+    values.map { T.sqrt($0) }
 }
 
-public func cbrtTransform(_ values: [Int]) -> [Float] {
-    values.map { pow(Float($0), 1.0 / 3.0) }
+public func cbrtTransform<T: TransformNumeric>(_ values: [T]) -> [T] {
+    values.map { T.pow($0, T(1) / T(3)) }
 }
 
-// MARK: - Log with Offset (Soft Log)
+// MARK: - Log with Offset
 
-public func logOffsetTransform(_ values: [Int], offset: Float = 500) -> [Float] {
-    values.map { log(Float($0) + offset) }
+public func logOffsetTransform<T: TransformNumeric>(
+    _ values: [T],
+    offset: T = 500
+) -> [T] {
+    values.map { T.log($0 + offset) }
 }
 
-public func log10OffsetTransform(_ values: [Int], offset: Float = 500) -> [Float] {
-    values.map { log10(Float($0) + offset) }
+public func log10OffsetTransform<T: TransformNumeric>(
+    _ values: [T],
+    offset: T = 500
+) -> [T] {
+    values.map { T.log10($0 + offset) }
 }
 
-// MARK: - asinh Transform (Linear near zero, log-like tail)
+// MARK: - asinh Transform
 
-public func asinhTransform(_ values: [Int], scale: Float = 500) -> [Float] {
-    values.map { asinh(Float($0) / scale) }
+public func asinhTransform<T: TransformNumeric>(
+    _ values: [T],
+    scale: T = 500
+) -> [T] {
+    values.map { T.asinh($0 / scale) }
 }
 
-// MARK: - Quantile / Rank-Based Scaling
-public func quantileTransform(_ values: [Int]) -> [Float] {
+// MARK: - Quantile Transform (duplicate-safe, average rank)
+
+public func quantileTransform<T: TransformNumeric>(_ values: [T]) -> [T] {
     guard values.count > 1 else { return values.map { _ in 0 } }
 
     let sorted = values.sorted()
-    let count = Float(sorted.count - 1)
+    let count = T(sorted.count - 1)
 
-    var valueToRank: [Int: Int] = [:]
-    for (index, value) in sorted.enumerated() {
-        // assign the FIRST rank only (ignore duplicates)
-        if valueToRank[value] == nil {
-            valueToRank[value] = index
-        }
+    var rankSum: [T: Int] = [:]
+    var rankCount: [T: Int] = [:]
+
+    for (i, v) in sorted.enumerated() {
+        rankSum[v, default: 0] += i
+        rankCount[v, default: 0] += 1
+    }
+
+    var avgRank: [T: T] = [:]
+    for (v, sum) in rankSum {
+        avgRank[v] = T(sum) / T(rankCount[v]!)
     }
 
     return values.map {
-        Float(valueToRank[$0] ?? 0) / count
+        (avgRank[$0] ?? 0) / count
     }
 }
 
 // MARK: - Winsorized Transforms
 
-public func winsorizedTransform(_ values: [Int], percentile: Float = 0.99) -> [Float] {
+public func winsorizedTransform<T: TransformNumeric>(
+    _ values: [T],
+    percentile: T = 0.99
+) -> [T] {
     guard !values.isEmpty else { return [] }
 
     let sorted = values.sorted()
-    let index = Int(Float(sorted.count - 1) * percentile)
+    let index = Int(T(sorted.count - 1) * percentile)
     let cap = sorted[index]
 
-    return values.map { Float(min($0, cap)) }
+    return values.map { min($0, cap) }
 }
 
-public func winsorizedSqrtTransform(_ values: [Int], percentile: Float = 0.99) -> [Float] {
-    winsorizedTransform(values, percentile: percentile).map { sqrt($0) }
+public func winsorizedSqrtTransform<T: TransformNumeric>(
+    _ values: [T],
+    percentile: T = 0.99
+) -> [T] {
+    winsorizedTransform(values, percentile: percentile).map { T.sqrt($0) }
 }
 
-// MARK: - Saturation / Logistic Transforms
+// MARK: - Saturation / Logistic
 
-public func saturationTransform(_ values: [Int], k: Float = 3000) -> [Float] {
-    values.map {
-        let x = Float($0)
-        return x / (x + k)
+public func saturationTransform<T: TransformNumeric>(
+    _ values: [T],
+    k: T = 3000
+) -> [T] {
+    values.map { x in
+        x / (x + k)
     }
 }
 
-public func logisticTransform(_ values: [Int], mean: Float = 3000, scale: Float = 1000) -> [Float] {
-    values.map {
-        let x = Float($0)
-        return 1.0 / (1.0 + exp(-(x - mean) / scale))
+public func logisticTransform<T: TransformNumeric>(
+    _ values: [T],
+    mean: T = 3000,
+    scale: T = 1000
+) -> [T] {
+    values.map { x in
+        T(1) / (T(1) + T.exp(-(x - mean) / scale))
     }
 }
 
@@ -323,7 +408,7 @@ public func spreadBinLists(values: [Float], bins: Int, by percentage: CGFloat) -
 
 /// Merge a group of bins into one combined bin
 private func mergeBins(group: [Bin]) -> Bin {
-    guard let first = group.first else {
+    guard let _ = group.first else {
         return Bin(min: 0, max: 0, weight: 0, percentage: 0)
     }
 
@@ -331,7 +416,7 @@ private func mergeBins(group: [Bin]) -> Bin {
     let maxVal = group.map { $0.max }.max()!
     let totalWeight = group.map { $0.weight }.reduce(0, +)
 
-    var merged = Bin(
+    let merged = Bin(
         min: minVal,
         max: maxVal,
         weight: totalWeight,
