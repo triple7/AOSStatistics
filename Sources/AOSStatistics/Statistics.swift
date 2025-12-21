@@ -264,7 +264,6 @@ public func refineBinsRecursively(
     for bin in histBins {
 //        print("bin: \(bin.min) \(bin.max)")
     }
-    print("total values: \(values.count)")
     while !belowThreshold {
 //        print("Reiterating histograms")
         for bin in histBins {
@@ -296,7 +295,7 @@ public func refineBinsRecursively(
 
             if newMin == newMax {
                 // reached the last bin
-                print("Last max bin \(maxBin.min) \(maxBin.max)")
+//                print("Last max bin \(maxBin.min) \(maxBin.max)")
                 flattenedBins.append(maxBin)
                 belowThreshold = true
                 continue
@@ -313,13 +312,11 @@ public func refineBinsRecursively(
     }
     
     // Recalculate bin ranges
-    print("Recalculating bin ranges")
     flattenedBins.sort()
 //    for bin in flattenedBins {
 //        print("flat bin: \(bin.min) \(bin.max)")
 //    }
     var finalBins = [Bin]()
-    print("Flattened bin count: \(flattenedBins.count)")
     var cumulativeBin:Bin
     var currentIndex = 0
     while currentIndex < flattenedBins.count {
@@ -359,7 +356,7 @@ public func refineBinsRecursively(
             }
         }
     }
-    print("Final bins count: \(finalBins.count)")
+    print("refineBinsRecursively: Final bins count: \(finalBins.count)")
     return finalBins
 }
 

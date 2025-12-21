@@ -30,7 +30,6 @@ public struct GistRainbow: Codable {
     }
 
     // MARK: - Violet
-
     public var violetVeryDark  = RGB(r: 0.28, g: 0.00, b: 0.50)
     public var violetDark      = RGB(r: 0.42, g: 0.00, b: 0.75)
     public var violet          = RGB(r: 0.56, g: 0.00, b: 1.00)
@@ -38,7 +37,6 @@ public struct GistRainbow: Codable {
     public var violetVeryLight = RGB(r: 0.85, g: 0.70, b: 1.00)
 
     // MARK: - Indigo
-
     public var indigoVeryDark  = RGB(r: 0.14, g: 0.00, b: 0.26)
     public var indigoDark      = RGB(r: 0.22, g: 0.00, b: 0.38)
     public var indigo          = RGB(r: 0.29, g: 0.00, b: 0.51)
@@ -46,7 +44,6 @@ public struct GistRainbow: Codable {
     public var indigoVeryLight = RGB(r: 0.70, g: 0.60, b: 0.85)
 
     // MARK: - Blue
-
     public var blueVeryDark    = RGB(r: 0.00, g: 0.00, b: 0.40)
     public var blueDark        = RGB(r: 0.00, g: 0.00, b: 0.70)
     public var blue            = RGB(r: 0.00, g: 0.00, b: 1.00)
@@ -54,7 +51,6 @@ public struct GistRainbow: Codable {
     public var blueVeryLight   = RGB(r: 0.70, g: 0.80, b: 1.00)
 
     // MARK: - Azure
-
     public var azureVeryDark   = RGB(r: 0.00, g: 0.25, b: 0.50)
     public var azureDark       = RGB(r: 0.00, g: 0.38, b: 0.75)
     public var azure           = RGB(r: 0.00, g: 0.50, b: 1.00)
@@ -62,7 +58,6 @@ public struct GistRainbow: Codable {
     public var azureVeryLight  = RGB(r: 0.70, g: 0.85, b: 1.00)
 
     // MARK: - Cyan
-
     public var cyanVeryDark    = RGB(r: 0.00, g: 0.50, b: 0.50)
     public var cyanDark        = RGB(r: 0.00, g: 0.75, b: 0.75)
     public var cyan            = RGB(r: 0.00, g: 1.00, b: 1.00)
@@ -70,7 +65,6 @@ public struct GistRainbow: Codable {
     public var cyanVeryLight   = RGB(r: 0.80, g: 1.00, b: 1.00)
 
     // MARK: - Green
-
     public var greenVeryDark   = RGB(r: 0.00, g: 0.40, b: 0.00)
     public var greenDark       = RGB(r: 0.00, g: 0.70, b: 0.00)
     public var green           = RGB(r: 0.00, g: 1.00, b: 0.00)
@@ -78,7 +72,6 @@ public struct GistRainbow: Codable {
     public var greenVeryLight  = RGB(r: 0.80, g: 1.00, b: 0.80)
 
     // MARK: - Yellow
-
     public var yellowVeryDark  = RGB(r: 0.60, g: 0.60, b: 0.00)
     public var yellowDark      = RGB(r: 0.85, g: 0.85, b: 0.00)
     public var yellow          = RGB(r: 1.00, g: 1.00, b: 0.00)
@@ -86,12 +79,18 @@ public struct GistRainbow: Codable {
     public var yellowVeryLight = RGB(r: 1.00, g: 1.00, b: 0.80)
 
     // MARK: - Orange
-
     public var orangeVeryDark  = RGB(r: 0.60, g: 0.30, b: 0.00)
     public var orangeDark      = RGB(r: 0.85, g: 0.45, b: 0.00)
     public var orange          = RGB(r: 1.00, g: 0.50, b: 0.00)
     public var orangeLight     = RGB(r: 1.00, g: 0.70, b: 0.40)
     public var orangeVeryLight = RGB(r: 1.00, g: 0.85, b: 0.70)
+
+    // MARK: - Red (NEW)
+    public var redVeryDark     = RGB(r: 0.50, g: 0.00, b: 0.00)
+    public var redDark         = RGB(r: 0.75, g: 0.00, b: 0.00)
+    public var red             = RGB(r: 1.00, g: 0.00, b: 0.00)
+    public var redLight        = RGB(r: 1.00, g: 0.40, b: 0.40)
+    public var redVeryLight    = RGB(r: 1.00, g: 0.70, b: 0.70)
 
     public init() {}
 
@@ -99,14 +98,32 @@ public struct GistRainbow: Codable {
 
     public func getColors() -> [Color] {
         return [
-            violetVeryDark, violetDark, violet, violetLight, violetVeryLight,
+            // Violet — bright → dark
+            violetVeryLight, violetLight, violet, violetDark, violetVeryDark,
+
+            // Indigo — dark → bright
             indigoVeryDark, indigoDark, indigo, indigoLight, indigoVeryLight,
-            blueVeryDark, blueDark, blue, blueLight, blueVeryLight,
+
+            // Blue — bright → dark
+            blueVeryLight, blueLight, blue, blueDark, blueVeryDark,
+
+            // Azure — dark → bright
             azureVeryDark, azureDark, azure, azureLight, azureVeryLight,
-            cyanVeryDark, cyanDark, cyan, cyanLight, cyanVeryLight,
+
+            // Cyan — bright → dark
+            cyanVeryLight, cyanLight, cyan, cyanDark, cyanVeryDark,
+
+            // Green — dark → bright
             greenVeryDark, greenDark, green, greenLight, greenVeryLight,
-            yellowVeryDark, yellowDark, yellow, yellowLight, yellowVeryLight,
-            orangeVeryDark, orangeDark, orange, orangeLight, orangeVeryLight
+
+            // Yellow — bright → dark
+            yellowVeryLight, yellowLight, yellow, yellowDark, yellowVeryDark,
+
+            // Orange — dark → bright
+            orangeVeryDark, orangeDark, orange, orangeLight, orangeVeryLight,
+
+            // Red — bright → dark
+            redVeryLight, redLight, red, redDark, redVeryDark
         ].map { $0.color() }
     }
 }
