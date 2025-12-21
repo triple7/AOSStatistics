@@ -158,6 +158,28 @@ public struct GistRainbow: Codable {
         ]
     }
 
+    public func interpolateColorFamilies(
+        families: [ColorFamily],
+        invert: Bool = false
+    ) -> [Color] {
+
+        var result: [Color] = []
+
+        for (index, family) in families.enumerated() {
+
+            var colors = darkestAndBrightest(for: family)
+            // colors is [dark, bright]
+
+            if invert && index % 2 == 1 {
+                colors.reverse()
+            }
+
+            result.append(contentsOf: colors)
+        }
+
+        return result
+    }
+
     // MARK: - Full spectrum (high → low frequency)
 
     public func getColors() -> [Color] {

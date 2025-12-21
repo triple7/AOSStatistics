@@ -261,9 +261,6 @@ public func refineBinsRecursively(
     var maxBinPercentage:Float = 0
     var maxValue:Float = 0
 
-    for bin in histBins {
-//        print("bin: \(bin.min) \(bin.max)")
-    }
     while !belowThreshold {
 //        print("Reiterating histograms")
         for bin in histBins {
@@ -363,9 +360,6 @@ public func refineBinsRecursively(
 public func spreadBinLists(values: [Float], bins: Int, by percentage: CGFloat) -> [Bin] {
     let (_, originalBins) = histogram(values: values, bins: bins)
     print("Checking original bins")
-    for bin in originalBins {
-//        print("bin: \(bin.min) \(bin.max) percentage \(bin.percentage)")
-    }
 
     // Only keep the first `bins` entries (histogram returns bins + 1 edges)
     let binsOnly = Array(originalBins[0..<bins])
