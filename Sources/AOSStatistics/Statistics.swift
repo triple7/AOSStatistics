@@ -356,7 +356,7 @@ public func refineBinsRecursively(
             }
         }
     }
-    print("refineBinsRecursively: Final bins count: \(finalBins.count)")
+    print("GAIAOctree: Final bins count: \(finalBins.count)")
     return finalBins
 }
 
