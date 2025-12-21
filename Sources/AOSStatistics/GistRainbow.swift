@@ -108,7 +108,7 @@ public struct GistRainbow: Codable {
 
     public func darkestAndBrightest(
         for family: ColorFamily
-    ) -> (dark: Color, bright: Color) {
+    ) -> [Color] {
 
         let darkRGB: RGB
         let brightRGB: RGB
@@ -152,7 +152,10 @@ public struct GistRainbow: Codable {
             brightRGB = redVeryLight
         }
 
-        return (dark: darkRGB.color(), bright: brightRGB.color())
+        return [
+            darkRGB.color(),
+            brightRGB.color()
+        ]
     }
 
     // MARK: - Full spectrum (high → low frequency)
