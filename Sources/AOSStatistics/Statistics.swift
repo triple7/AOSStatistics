@@ -276,10 +276,10 @@ public func refineBinsRecursively(
             }
         }
         
-        print("MaxBin: min \(maxBin.min) max \(maxBin.max) percentage \(maxBinPercentage)")
-        print("Percentage threshold: \(thresholdPercentage)")
+//        print("MaxBin: min \(maxBin.min) max \(maxBin.max) percentage \(maxBinPercentage)")
+//        print("Percentage threshold: \(thresholdPercentage)")
         if maxBinPercentage > thresholdPercentage {
-            print("MaxBin percentage > threshold")
+//            print("MaxBin percentage > threshold")
             // Collate the smaller percentages
             for bin in histBins {
                 if bin != maxBin {
@@ -287,17 +287,17 @@ public func refineBinsRecursively(
                 }
             }
             
-            print("Added \(flattenedBins.count) bins")
+//            print("Added \(flattenedBins.count) bins")
             // Continue with a new histogram
             let maxbinValues = values.filter{$0 < maxValue}
             
             let newMin = maxbinValues.min()!
             let newMax = maxbinValues.max()!
-            print("New values under maxValue: \(maxbinValues.count) min \(newMin) max \(newMax)")
+//            print("New values under maxValue: \(maxbinValues.count) min \(newMin) max \(newMax)")
 
             if newMin == newMax {
                 // reached the last bin
-                print("Last max bin \(maxBin.min) \(maxBin.max)")
+//                print("Last max bin \(maxBin.min) \(maxBin.max)")
                 flattenedBins.append(maxBin)
                 belowThreshold = true
                 continue
