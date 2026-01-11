@@ -347,13 +347,11 @@ public func refineBinsRecursively(
                 finalBins.append(Bin(min: flattenedBins[currentIndex].min, max: lastBin.max, weight: cumulativeWeight, percentage: cumulativeThreshold*100))
                 print("Added final bin")
                 currentIndex += j
-                if currentIndex >= flattenedBins.count {
-                    currentIndex = flattenedBins.count
-                }
             } else {
                 print("Trailing bin \(flattenedBins[currentIndex])")
                 // Trailing bin, just append
                 finalBins.append(flattenedBins[currentIndex])
+                break
             }
         } else {
             // threshold is greater but the bin has floating point marginal overshot
