@@ -345,13 +345,13 @@ public func refineBinsRecursively(
                     print("New cumulative \(cumulativeThreshold) at \(currentIndex + j)")
                 }
                 finalBins.append(Bin(min: flattenedBins[currentIndex].min, max: lastBin.max, weight: cumulativeWeight, percentage: cumulativeThreshold*100))
-//                print("Added final bin")
+                print("Added final bin")
                 currentIndex += j
                 if currentIndex >= flattenedBins.count {
-                    currentIndex = flattenedBins.count
+                    break
                 }
             } else {
-//                print("Trailing bin \(flattenedBins[currentIndex])")
+                print("Trailing bin \(flattenedBins[currentIndex])")
                 // Trailing bin, just append
                 finalBins.append(flattenedBins[currentIndex])
             }
