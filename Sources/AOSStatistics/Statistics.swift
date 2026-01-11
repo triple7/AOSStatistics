@@ -342,7 +342,7 @@ public func refineBinsRecursively(
                     cumulativeThreshold += lastBin.percentage/100
                     cumulativeWeight += lastBin.weight
                     j += 1
-//                    print("New cumulative \(cumulativeThreshold) at \(currentIndex + j)")
+                    print("New cumulative \(cumulativeThreshold) at \(currentIndex + j)")
                 }
                 finalBins.append(Bin(min: flattenedBins[currentIndex].min, max: lastBin.max, weight: cumulativeWeight, percentage: cumulativeThreshold*100))
 //                print("Added final bin")
