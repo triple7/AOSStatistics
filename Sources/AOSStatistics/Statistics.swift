@@ -211,7 +211,7 @@ public func histogram(values: [Float], bins: Int, range: (Float, Float)? = nil) 
 
     // Compute bin width
     let binWidth = (maxVal - minVal) / Float(bins)
-//    print("bin min \(minVal) max \(maxVal)")
+    print("bin min \(minVal) max \(maxVal)")
 
     // Prepare counts and bin edges
     var counts = Array(repeating: 0, count: bins)
@@ -249,6 +249,10 @@ public func histogram(values: [Float], bins: Int, range: (Float, Float)? = nil) 
         edges[i].setWeight(weight: w)
     }
 
+    print("histogram: generated \(counts) bins")
+    for (i, edge) in edges.enumerated() {
+        print("edge \(i): min: \(edge.min) max \(edge.max)")
+    }
     return (counts, edges)
 }
 
