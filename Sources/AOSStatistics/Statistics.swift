@@ -335,6 +335,7 @@ public func refineBinsRecursively(
 //            print("Index less than flattened \(currentIndex + 1) <= flattenedBins.count)")
             if (currentIndex + 1) <= flattenedBins.count {
                 var j:Int = 1
+                print("Last index: \(currentIndex) new index \(flattenedBins.count)")
                 var lastBin = flattenedBins[currentIndex + 1]
                 while cumulativeThreshold <= thresholdPercentage && (currentIndex + j) < flattenedBins.count  {
                     lastBin = flattenedBins[currentIndex + j]
