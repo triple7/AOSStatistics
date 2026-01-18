@@ -261,19 +261,25 @@ public func refineBinsRecursively(
     maxBins: Int,
     thresholdPercentage: Float
 ) -> [Bin] {
-    // 1. Capture the global total weight before starting
-    // If weight is count-based: Float(values.count). If sum-based: values.reduce(0, +)
-    let totalWeight = Float(values.count)
+    // 1. Establish the global total weight (sum of all bin weights)
+    // This is the anchor for all percentage calculations.
+    let initialHist = histogram(values: values, bins: maxBins).1
+    let totalWeight = initialHist.reduce(0) { $0 + $1.weight }
     
+    guard totalWeight > 0 else { return [] }
+
     var flattenedBins = [Bin]()
     var belowThreshold = false
-    var histBins = histogram(values: values, bins: maxBins).1
+    var histBins = initialHist
+    
+    // Tracking for recursion
     var maxBin = histBins.first!
     var maxBinPercentage: Float = 0
     var maxValue: Float = 0
 
     while !belowThreshold {
         for bin in histBins {
+            // Check percentage relative to the current local histogram
             if bin.percentage/100 > maxBinPercentage {
                 maxBinPercentage = bin.percentage/100
                 maxBin = bin
@@ -300,56 +306,62 @@ public func refineBinsRecursively(
             maxBinPercentage = 0
             maxValue = 0
         } else {
+            // Append all remaining bins from the last local histogram
+            flattenedBins.append(contentsOf: histBins)
             belowThreshold = true
-            continue
         }
     }
     
     flattenedBins.sort()
     
+    // 2. Merge bins using weights to ensure cumulative sum is accurate
     var finalBins = [Bin]()
     var currentIndex = 0
+    
     while currentIndex < flattenedBins.count {
         var cumulativeBin = flattenedBins[currentIndex]
-        var cumulativeThreshold = cumulativeBin.percentage/100
-        var cumulativeWeight = cumulativeBin.weight
         
-        if cumulativeThreshold <= thresholdPercentage {
-            if (currentIndex + 1) < flattenedBins.count {
-                var j: Int = 1
-                var lastBin = flattenedBins[currentIndex + 1]
-                while cumulativeThreshold <= thresholdPercentage && (currentIndex + j) < flattenedBins.count  {
-                    lastBin = flattenedBins[currentIndex + j]
-                    cumulativeThreshold += lastBin.percentage/100
-                    cumulativeWeight += lastBin.weight
+        // Calculate the TRUE percentage of this bin relative to the whole dataset
+        var cumulativeWeight = cumulativeBin.weight
+        var currentTruePercentage = cumulativeWeight / totalWeight
+        
+        if currentTruePercentage <= thresholdPercentage {
+            var j = 1
+            while (currentIndex + j) < flattenedBins.count {
+                let nextBin = flattenedBins[currentIndex + j]
+                let nextWeight = nextBin.weight
+                
+                // Peek if adding the next bin stays within threshold
+                if (cumulativeWeight + nextWeight) / totalWeight <= thresholdPercentage {
+                    cumulativeWeight += nextWeight
+                    cumulativeBin = Bin(
+                        min: cumulativeBin.min,
+                        max: nextBin.max,
+                        weight: cumulativeWeight,
+                        percentage: (cumulativeWeight / totalWeight) * 100
+                    )
                     j += 1
+                } else {
+                    break
                 }
-                finalBins.append(Bin(min: flattenedBins[currentIndex].min, max: lastBin.max, weight: cumulativeWeight, percentage: cumulativeThreshold*100))
-                currentIndex += j
-            } else {
-                finalBins.append(flattenedBins[currentIndex])
-                break
             }
+            finalBins.append(cumulativeBin)
+            currentIndex += j
         } else {
-            finalBins.append(flattenedBins[currentIndex])
+            // Even if it's over the threshold, we must update its local percentage to the global one
+            let correctedBin = Bin(
+                min: cumulativeBin.min,
+                max: cumulativeBin.max,
+                weight: cumulativeBin.weight,
+                percentage: (cumulativeBin.weight / totalWeight) * 100
+            )
+            finalBins.append(correctedBin)
             currentIndex += 1
         }
     }
 
-    // 2. Final Recalculation Pass
-    // This ensures all percentages are relative to the final global set
-    let recalculatedBins = finalBins.map { bin -> Bin in
-        let correctedPercentage = totalWeight > 0 ? (bin.weight / totalWeight) * 100 : 0
-        return Bin(
-            min: bin.min,
-            max: bin.max,
-            weight: bin.weight,
-            percentage: correctedPercentage
-        )
-    }
-
-    print("Final bins count: \(recalculatedBins.count)")
-    return recalculatedBins
+    print("Final bins count: \(finalBins.count)")
+    return finalBins
 }
 
 public func spreadBinLists(values: [Float], bins: Int, by percentage: CGFloat) -> [Bin] {
