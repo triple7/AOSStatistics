@@ -211,7 +211,7 @@ public func histogram(values: [Float], bins: Int, range: (Float, Float)? = nil) 
 
     // Compute bin width
     let binWidth = (maxVal - minVal) / Float(bins)
-    print("bin min \(minVal) max \(maxVal)")
+//    print("bin min \(minVal) max \(maxVal)")
 
     // Prepare counts and bin edges
     var counts = Array(repeating: 0, count: bins)
@@ -272,7 +272,7 @@ public func refineBinsRecursively(
 
     while !belowThreshold {
 //        print("Reiterating histograms")
-        for bin in histBins {
+        for (i, bin) in histBins.enumerated() {
             if bin.percentage/100 > maxBinPercentage {
                 maxBinPercentage = bin.percentage/100
                 maxBin = bin
@@ -280,10 +280,10 @@ public func refineBinsRecursively(
             }
         }
         
-        print("MaxBin: min \(maxBin.min) max \(maxBin.max) percentage \(maxBinPercentage)")
-        print("Percentage threshold: \(thresholdPercentage)")
+//        print("MaxBin for bin \(i + 1): min \(maxBin.min) max \(maxBin.max) percentage \(maxBinPercentage)")
+//        print("Percentage threshold: \(thresholdPercentage)")
         if maxBinPercentage > thresholdPercentage {
-            print("MaxBin percentage > threshold")
+//            print("MaxBin percentage > threshold")
             // Collate the smaller percentages
             for bin in histBins {
                 if bin != maxBin {
@@ -291,17 +291,17 @@ public func refineBinsRecursively(
                 }
             }
             
-            print("Added \(flattenedBins.count) bins")
+//            print("Added \(flattenedBins.count) bins")
             // Continue with a new histogram
             let maxbinValues = values.filter{$0 < maxValue}
             
             let newMin = maxbinValues.min()!
             let newMax = maxbinValues.max()!
-            print("New values under maxValue: \(maxbinValues.count) min \(newMin) max \(newMax)")
+//            print("New values under maxValue: \(maxbinValues.count) min \(newMin) max \(newMax)")
 
             if newMin == newMax {
                 // reached the last bin
-                print("Last max bin \(maxBin.min) \(maxBin.max)")
+//                print("Last max bin \(maxBin.min) \(maxBin.max)")
                 flattenedBins.append(maxBin)
                 belowThreshold = true
                 continue
@@ -335,20 +335,20 @@ public func refineBinsRecursively(
 //            print("Index less than flattened \(currentIndex + 1) <= flattenedBins.count)")
             if (currentIndex + 1) < flattenedBins.count {
                 var j:Int = 1
-                print("Last index: \(currentIndex) new index \(flattenedBins.count)")
+//                print("Last index: \(currentIndex) new index \(flattenedBins.count)")
                 var lastBin = flattenedBins[currentIndex + 1]
                 while cumulativeThreshold <= thresholdPercentage && (currentIndex + j) < flattenedBins.count  {
                     lastBin = flattenedBins[currentIndex + j]
                     cumulativeThreshold += lastBin.percentage/100
                     cumulativeWeight += lastBin.weight
                     j += 1
-                    print("New cumulative \(cumulativeThreshold) at \(currentIndex + j)")
+//                    print("New cumulative \(cumulativeThreshold) at \(currentIndex + j)")
                 }
                 finalBins.append(Bin(min: flattenedBins[currentIndex].min, max: lastBin.max, weight: cumulativeWeight, percentage: cumulativeThreshold*100))
-                print("Added final bin")
+//                print("Added final bin")
                 currentIndex += j
             } else {
-                print("Trailing bin \(flattenedBins[currentIndex])")
+//                print("Trailing bin \(flattenedBins[currentIndex])")
                 // Trailing bin, just append
                 finalBins.append(flattenedBins[currentIndex])
                 break
