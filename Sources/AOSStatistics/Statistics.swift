@@ -323,7 +323,7 @@ public func refineBinsRecursively(
         
         // Calculate the TRUE percentage of this bin relative to the whole dataset
         var cumulativeWeight = cumulativeBin.weight
-        var currentTruePercentage = cumulativeWeight / totalWeight
+        let currentTruePercentage = cumulativeWeight / totalWeight
         
         if currentTruePercentage <= thresholdPercentage {
             var j = 1

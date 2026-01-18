@@ -7,7 +7,7 @@
 
 import SceneKit
 
-class KDTreeNode {
+public class KDTreeNode {
     var point: SCNVector3
     var left: KDTreeNode?
     var right: KDTreeNode?
@@ -47,7 +47,7 @@ func distanceSquared(_ a: SCNVector3, _ b: SCNVector3) -> Float {
     return Float(dx2 + dy2 + dz2)
 }
 
-func knnSearch(nodeSearch: KDTreeNode?, target: SCNVector3, k: Int, heap: inout [(distance: Float, point: SCNVector3)]) {
+public func knnSearch(nodeSearch: KDTreeNode?, target: SCNVector3, k: Int, heap: inout [(distance: Float, point: SCNVector3)]) {
     guard let node = nodeSearch else{
         return
     }
@@ -78,7 +78,7 @@ func knnSearch(nodeSearch: KDTreeNode?, target: SCNVector3, k: Int, heap: inout 
     }
 }
 
-func estimateDensity(points: [SCNVector3], k: Int) -> [Float] {
+public func estimateDensity(points: [SCNVector3], k: Int) -> [Float] {
     let tree = buildKDTree(points: points)
     var densities: [Float] = []
     for point in points {
