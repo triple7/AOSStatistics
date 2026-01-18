@@ -246,7 +246,7 @@ public func interpolateGradient(
         let t = CGFloat(i) / CGFloat(count - 1)      // 0 → 1
         let position = t * maxIndex
 
-        print("position is \(position)")
+//        print("position is \(position)")
         let lower = Int(floor(position))
         let upper = min(lower + 1, lastIndex)
         let localT = position - CGFloat(lower)
