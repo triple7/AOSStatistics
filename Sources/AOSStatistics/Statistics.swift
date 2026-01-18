@@ -261,95 +261,95 @@ public func refineBinsRecursively(
     maxBins: Int,
     thresholdPercentage: Float
 ) -> [Bin] {
-    guard !values.isEmpty else { return [] }
-    
-    // 1. Calculate the total weight of the entire dataset for global normalization
-    // If 'weight' in your Bin refers to the count of items:
+    // 1. Capture the global total weight before starting
+    // If weight is count-based: Float(values.count). If sum-based: values.reduce(0, +)
     let totalWeight = Float(values.count)
-    // If 'weight' refers to the sum of values, use: values.reduce(0, +)
-
+    
     var flattenedBins = [Bin]()
     var belowThreshold = false
     var histBins = histogram(values: values, bins: maxBins).1
-    
-    // Use a copy of values for filtering to avoid side effects
-    var currentValues = values
+    var maxBin = histBins.first!
+    var maxBinPercentage: Float = 0
+    var maxValue: Float = 0
 
     while !belowThreshold {
-        var maxBin: Bin? = nil
-        var maxBinPercentage: Float = -1.0
-        
         for bin in histBins {
-            // Check percentage relative to local hist
-            let localPct = bin.percentage / 100
-            if localPct > maxBinPercentage {
-                maxBinPercentage = localPct
+            if bin.percentage/100 > maxBinPercentage {
+                maxBinPercentage = bin.percentage/100
                 maxBin = bin
+                maxValue = bin.max
             }
         }
-
-        if let maxBin = maxBin, maxBinPercentage > thresholdPercentage {
-            // Keep bins that are NOT the max bin
+        
+        if maxBinPercentage > thresholdPercentage {
             for bin in histBins {
                 if bin != maxBin {
                     flattenedBins.append(bin)
                 }
             }
             
-            // Refine the max bin specifically
-            let maxValue = maxBin.max
-            let maxbinValues = currentValues.filter { $0 <= maxValue && $0 >= maxBin.min }
+            let maxbinValues = values.filter { $0 < maxValue }
             
-            if maxbinValues.isEmpty || Set(maxbinValues).count == 1 {
+            if maxbinValues.isEmpty || maxbinValues.min() == maxbinValues.max() {
                 flattenedBins.append(maxBin)
                 belowThreshold = true
-            } else {
-                currentValues = maxbinValues
-                histBins = histogram(values: currentValues, bins: maxBins).1
+                continue
             }
+            
+            histBins = histogram(values: maxbinValues, bins: maxBins).1
+            maxBinPercentage = 0
+            maxValue = 0
         } else {
-            // All bins are below threshold, add them all
-            flattenedBins.append(contentsOf: histBins)
             belowThreshold = true
+            continue
         }
     }
     
-    // 2. Sort and merge fragments (Your existing merging logic)
-    flattenedBins.sort { $0.min < $1.min }
+    flattenedBins.sort()
     
     var finalBins = [Bin]()
     var currentIndex = 0
-    
     while currentIndex < flattenedBins.count {
-        var currentBin = flattenedBins[currentIndex]
-        var runningWeight = currentBin.weight
-        var nextIdx = currentIndex + 1
+        var cumulativeBin = flattenedBins[currentIndex]
+        var cumulativeThreshold = cumulativeBin.percentage/100
+        var cumulativeWeight = cumulativeBin.weight
         
-        // Merge small bins until the threshold is hit
-        while nextIdx < flattenedBins.count && (runningWeight / totalWeight) < thresholdPercentage {
-            runningWeight += flattenedBins[nextIdx].weight
-            currentBin = Bin(
-                min: currentBin.min,
-                max: flattenedBins[nextIdx].max,
-                weight: runningWeight,
-                percentage: 0 // Will fix below
-            )
-            nextIdx += 1
+        if cumulativeThreshold <= thresholdPercentage {
+            if (currentIndex + 1) < flattenedBins.count {
+                var j: Int = 1
+                var lastBin = flattenedBins[currentIndex + 1]
+                while cumulativeThreshold <= thresholdPercentage && (currentIndex + j) < flattenedBins.count  {
+                    lastBin = flattenedBins[currentIndex + j]
+                    cumulativeThreshold += lastBin.percentage/100
+                    cumulativeWeight += lastBin.weight
+                    j += 1
+                }
+                finalBins.append(Bin(min: flattenedBins[currentIndex].min, max: lastBin.max, weight: cumulativeWeight, percentage: cumulativeThreshold*100))
+                currentIndex += j
+            } else {
+                finalBins.append(flattenedBins[currentIndex])
+                break
+            }
+        } else {
+            finalBins.append(flattenedBins[currentIndex])
+            currentIndex += 1
         }
-        
-        finalBins.append(currentBin)
-        currentIndex = nextIdx
     }
 
-    // 3. GLOBAL PERCENTAGE UPDATE
-    // Map the bins one last time to ensure percentages are relative to the whole dataset
-    let normalizedBins = finalBins.map { bin -> Bin in
-        let globalPercentage = (bin.weight / totalWeight) * 100
-        return Bin(min: bin.min, max: bin.max, weight: bin.weight, percentage: globalPercentage)
+    // 2. Final Recalculation Pass
+    // This ensures all percentages are relative to the final global set
+    let recalculatedBins = finalBins.map { bin -> Bin in
+        let correctedPercentage = totalWeight > 0 ? (bin.weight / totalWeight) * 100 : 0
+        return Bin(
+            min: bin.min,
+            max: bin.max,
+            weight: bin.weight,
+            percentage: correctedPercentage
+        )
     }
 
-    print("Final bins count: \(normalizedBins.count)")
-    return normalizedBins
+    print("Final bins count: \(recalculatedBins.count)")
+    return recalculatedBins
 }
 
 public func spreadBinLists(values: [Float], bins: Int, by percentage: CGFloat) -> [Bin] {
