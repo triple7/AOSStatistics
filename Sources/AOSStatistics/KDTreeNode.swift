@@ -90,3 +90,14 @@ public func estimateDensity(points: [SCNVector3], k: Int) -> [Float] {
     return densities
 }
 
+// TODO: generalise this in AOSUniverse instead
+public func getSCN(path: URL) -> SCNScene {
+    do {
+        let scene = try SCNScene(url: path, options: nil)
+        return scene
+    } catch {
+        print("Failed to load SCNScene from \(path): \(error)")
+        return SCNScene()
+    }
+}
+
