@@ -7,6 +7,8 @@
 
 import SceneKit
 
+
+
 public func applyTransform<T: TransformNumeric>(
     transformType: TransformType,
     values: [T]
@@ -126,7 +128,7 @@ public func createLocalizationNode(points: [SCNVector3]) -> SCNNode? {
     let length = CGFloat(maxZ - minZ)
     
     let box = SCNBox(width: width, height: height, length: length, chamferRadius: 0)
-    box.firstMaterial?.diffuse.contents = UIColor.systemRed.withAlphaComponent(0.4)
+    box.firstMaterial?.diffuse.contents = Color.systemRed.withAlphaComponent(0.4)
     
     let node = SCNNode(geometry: box)
     node.position = centroid
