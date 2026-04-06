@@ -249,10 +249,10 @@ public func histogram(values: [Float], bins: Int, range: (Float, Float)? = nil) 
         edges[i].setWeight(weight: w)
     }
 
-    print("histogram: generated \(counts) bins")
-    for (i, edge) in edges.enumerated() {
-        print("edge \(i): min: \(edge.min) max \(edge.max)")
-    }
+//    print("histogram: generated \(counts) bins")
+//    for (i, edge) in edges.enumerated() {
+//        print("edge \(i): min: \(edge.min) max \(edge.max)")
+//    }
     return (counts, edges)
 }
 
@@ -360,13 +360,13 @@ public func refineBinsRecursively(
         }
     }
 
-    print("Final bins count: \(finalBins.count)")
+//    print("Final bins count: \(finalBins.count)")
     return finalBins
 }
 
 public func spreadBinLists(values: [Float], bins: Int, by percentage: CGFloat) -> [Bin] {
     let (_, originalBins) = histogram(values: values, bins: bins)
-    print("Checking original bins")
+//    print("Checking original bins")
 
     // Only keep the first `bins` entries (histogram returns bins + 1 edges)
     let binsOnly = Array(originalBins[0..<bins])
