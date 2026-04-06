@@ -208,5 +208,8 @@ extension SCNVector3: Hashable {
         hasher.combine(y)
         hasher.combine(z)
     }
-}
 
+    public static func == (lhs: SCNVector3, rhs: SCNVector3) -> Bool {
+        return lhs.x == rhs.x && lhs.y == rhs.y && lhs.z == rhs.z
+    }
+}
