@@ -108,9 +108,9 @@ public func createLocalizationNode(points: [SCNVector3]) -> SCNNode? {
     guard !points.isEmpty else { return nil }
     
     // 1. Calculate Centroid
-    let sumX = points.reduce(0) { $0 + $1.x }
-    let sumY = points.reduce(0) { $0 + $1.y }
-    let sumZ = points.reduce(0) { $0 + $1.z }
+    let sumX = Float(points.reduce(0) { $0 + $1.x })
+    let sumY = Float(points.reduce(0) { $0 + $1.y })
+    let sumZ = Float(points.reduce(0) { $0 + $1.z })
     let count = Float(points.count)
     let centroid = SCNVector3(sumX/count, sumY/count, sumZ/count)
     
